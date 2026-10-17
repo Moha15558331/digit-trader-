@@ -3,638 +3,330 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Deriv Digit Match Trader</title>
+<title>Digit Match Auto Trader</title>
 <style>
 :root{color-scheme:dark;--bg:#0b1020;--card:#141c2f;--border:#293650;--text:#edf2ff;--muted:#9aa9c2;--green:#38d996;--yellow:#f5ca62;--red:#ff6978}
-*{box-sizing:border-box}
-body{margin:0;padding:16px 12px 40px;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Arial,sans-serif}
-main{max-width:560px;margin:auto}
-h1{font-size:22px;margin:0 0 4px}h2{font-size:15px;margin:0 0 10px}
-.muted{color:var(--muted);font-size:12px;line-height:1.5}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin:12px 0}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0;font-size:13px}
+*{box-sizing:border-box}body{margin:0;padding:14px 10px 36px;background:var(--bg);color:var(--text);font-family:system-ui,Arial,sans-serif}
+main{max-width:540px;margin:auto}h1{font-size:20px;margin:0 0 4px}h2{font-size:14px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:12px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin:10px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0;font-size:13px}
 .label{color:var(--muted)}
-button{border:0;border-radius:8px;padding:11px 16px;background:#3478f6;color:#fff;cursor:pointer;font-size:14px;font-weight:600}
-button:disabled{opacity:.45;cursor:not-allowed}
+button{border:0;border-radius:8px;padding:10px 14px;background:#3478f6;color:#fff;cursor:pointer;font-size:13px;font-weight:600}
+button:disabled{opacity:.4;cursor:not-allowed}
 button.secondary{background:#293650;font-weight:500}
 button.success{background:#1a5b45}
-button.danger{background:#8b2e3a}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-input,select{background:#10182a;border:1px solid var(--border);border-radius:7px;color:var(--text);padding:10px;font-size:14px;width:100%}
-.field{margin:8px 0}
-.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:4px}
-.field-row{display:flex;gap:10px;flex-wrap:wrap}
-.field-row .field{flex:1;min-width:110px}
-.warn{background:#2a2210;border:1px solid #5c4a1e;color:var(--yellow);padding:12px;border-radius:8px;font-size:12px;line-height:1.55;margin:8px 0}
-.market{background:#10182a;border:1px solid var(--border);border-radius:10px;padding:12px;margin:8px 0}
-.market.match{background:#12382e;border-color:var(--green)}
-.market h3{font-size:14px;margin:0 0 6px}
-.badge{display:inline-block;padding:3px 8px;border-radius:6px;background:#26334b;color:var(--muted);font-size:11px;margin-bottom:6px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+input,select{background:#10182a;border:1px solid var(--border);border-radius:7px;color:var(--text);padding:9px;font-size:13px;width:100%}
+.field{margin:6px 0}.field label{display:block;color:var(--muted);font-size:11px;margin-bottom:3px}
+.field-row{display:flex;gap:8px;flex-wrap:wrap}.field-row .field{flex:1;min-width:90px}
+.warn{background:#2a2210;border:1px solid #5c4a1e;color:var(--yellow);padding:10px;border-radius:8px;font-size:12px;line-height:1.45;margin:6px 0}
+.market{background:#10182a;border:1px solid var(--border);border-radius:10px;padding:10px;margin:6px 0}
+.market.match{background:#12382e;border-color:var(--green)}.market h3{font-size:13px;margin:0 0 4px}
+.badge{display:inline-block;padding:2px 7px;border-radius:5px;background:#26334b;color:var(--muted);font-size:10px;margin-bottom:4px}
 .match .badge{background:#1a5b45;color:#9dffd1}
-.digits{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}
-.digit{background:#26334b;border-radius:4px;min-width:24px;padding:4px;text-align:center;font-size:12px}
+.digits{display:flex;flex-wrap:wrap;gap:3px;margin:3px 0}
+.digit{background:#26334b;border-radius:4px;min-width:22px;padding:3px;text-align:center;font-size:11px}
 .match .digit{background:#1a5b45}
-#log{max-height:220px;overflow:auto;font:12px/1.5 monospace;overflow-wrap:anywhere}
-.log-entry{border-bottom:1px solid var(--border);padding:3px 0}
-.pnl-pos{color:var(--green);font-weight:600}
-.pnl-neg{color:var(--red);font-weight:600}
-.toggle{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px}
-.toggle input{width:auto}
+#log{max-height:240px;overflow:auto;font:11px/1.45 monospace;overflow-wrap:anywhere}
+.log-entry{border-bottom:1px solid var(--border);padding:2px 0}
+.pnl-pos{color:var(--green);font-weight:700}.pnl-neg{color:var(--red);font-weight:700}
+.toggle{display:flex;align-items:center;gap:6px;margin:6px 0;font-size:13px}.toggle input{width:auto}
 </style>
 </head>
 <body>
 <main>
-<h1>Deriv Digit Match Trader</h1>
-<p class="muted">Public ticks → MATCH signal → DIGITMATCH on demo</p>
+<h1>Digit Match Auto Trader</h1>
+<p class="muted">Public ticks → MATCH → DIGITMATCH on demo (same flow as the $1 test)</p>
 
 <section class="card">
-<h2>Market data (public)</h2>
-<div class="row"><span class="label">Data</span><span id="dataStatus" style="color:var(--yellow)">Starting…</span></div>
-<div class="row"><span class="label">Ready</span><span id="ready">0 / 10</span></div>
-</section>
-
-<section class="card">
-<h2>Demo connect</h2>
-<div class="warn">
-Paste your PAT only in this browser — do <strong>not</strong> commit the token to GitHub.<br>
-App ID must match the app that created the PAT.
-</div>
-<div class="field">
-<label>PAT token</label>
-<input type="password" id="token" placeholder="pat_…" autocomplete="off">
-</div>
-<div class="field">
-<label>App ID</label>
-<input type="text" id="appId" value="34HGxgLgJ2cgLoSHopY2r">
-</div>
-<div class="row"><span class="label">Trade</span><span id="tradeStatus" style="color:var(--yellow)">Not connected</span></div>
+<h2>1. Connect demo</h2>
+<div class="warn">Paste PAT only here. Never put the token in GitHub source.</div>
+<div class="field"><label>PAT</label><input type="password" id="token" placeholder="pat_…" autocomplete="off"></div>
+<div class="field"><label>App ID</label><input type="text" id="appId" value="34HGxgLgJ2cgLoSHopY2r"></div>
+<div class="row"><span class="label">Data</span><span id="dataStatus">—</span></div>
+<div class="row"><span class="label">Trade</span><span id="tradeStatus">Not connected</span></div>
 <div class="row"><span class="label">Account</span><span id="account">—</span></div>
 <div class="actions">
 <button id="btnConnect">Connect demo</button>
+<button id="btnTest" class="secondary" disabled>Test trade $1</button>
 <button id="btnDisconnect" class="secondary" disabled>Disconnect</button>
 </div>
 </section>
 
 <section class="card">
-<h2>Trade settings</h2>
+<h2>2. Settings (auto)</h2>
 <div class="field-row">
 <div class="field"><label>Stake</label><input type="number" id="stake" value="1" min="0.35" step="0.01"></div>
-<div class="field"><label>Stop loss</label><input type="number" id="sl" value="20" min="0" step="1"></div>
-<div class="field"><label>Ticks</label>
-<select id="dur">
-<option value="1" selected>1</option>
-<option value="2">2</option>
-<option value="3">3</option>
-<option value="5">5</option>
-</select>
+<div class="field"><label>Stop loss $</label><input type="number" id="sl" value="10" min="0" step="1"></div>
+<div class="field"><label>Take profit $</label><input type="number" id="tp" value="20" min="0" step="1"></div>
 </div>
+<div class="field-row">
+<div class="field"><label>Duration (ticks)</label>
+<select id="dur"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="5">5</option></select>
 </div>
-<div class="toggle"><input type="checkbox" id="auto"><label for="auto">Auto-trade on MATCH</label></div>
+<div class="field"><label>Cooldown (sec)</label><input type="number" id="cd" value="15" min="5" step="1"></div>
+</div>
+<div class="toggle"><input type="checkbox" id="auto" checked><label for="auto">Auto-trade on MATCH</label></div>
 <div class="row"><span class="label">Session P/L</span><span id="pnl" class="pnl-pos">0.00</span></div>
-<div class="row"><span class="label">Trades</span><span id="tc">0</span></div>
+<div class="row"><span class="label">Trades / Wins</span><span id="tc">0 / 0</span></div>
 </section>
 
 <section class="card">
-<h2>Matching markets</h2>
-<p class="muted">Prev 300 vs latest 120 ticks — shared top digit = signal</p>
+<h2>3. MATCH signals</h2>
+<p class="muted">Prev 300 vs latest 120 — shared top digit → DIGITMATCH</p>
 <div id="matches" class="muted">Waiting for ticks…</div>
 </section>
 
 <section class="card">
-<h2>All markets</h2>
+<h2>Markets</h2>
 <div id="markets"></div>
 </section>
 
 <section class="card">
 <h2>Log</h2>
-<div id="log" class="muted">Ready</div>
+<div id="log" class="muted">Paste PAT → Connect demo</div>
 </section>
 </main>
-
 <script>
 "use strict";
-
-const DATA_URL = "wss://api.derivws.com/trading/v1/options/ws/public";
-const REST = "https://api.derivws.com/trading/v1/options";
-const DEFAULT_APP = "34HGxgLgJ2cgLoSHopY2r";
-
-const MARKETS = [
-  { symbol: "1HZ10V", name: "Vol 10 (1s)", decimals: 2 },
-  { symbol: "1HZ25V", name: "Vol 25 (1s)", decimals: 2 },
-  { symbol: "1HZ50V", name: "Vol 50 (1s)", decimals: 2 },
-  { symbol: "1HZ75V", name: "Vol 75 (1s)", decimals: 2 },
-  { symbol: "1HZ100V", name: "Vol 100 (1s)", decimals: 2 },
-  { symbol: "R_10", name: "Vol 10", decimals: 3 },
-  { symbol: "R_25", name: "Vol 25", decimals: 3 },
-  { symbol: "R_50", name: "Vol 50", decimals: 4 },
-  { symbol: "R_75", name: "Vol 75", decimals: 4 },
-  { symbol: "R_100", name: "Vol 100", decimals: 2 }
+const DATA_URL="wss://api.derivws.com/trading/v1/options/ws/public";
+const REST="https://api.derivws.com/trading/v1/options";
+const MARKETS=[
+{symbol:"1HZ10V",name:"Vol 10 (1s)",decimals:2},
+{symbol:"1HZ25V",name:"Vol 25 (1s)",decimals:2},
+{symbol:"1HZ50V",name:"Vol 50 (1s)",decimals:2},
+{symbol:"1HZ75V",name:"Vol 75 (1s)",decimals:2},
+{symbol:"1HZ100V",name:"Vol 100 (1s)",decimals:2},
+{symbol:"R_10",name:"Vol 10",decimals:3},
+{symbol:"R_25",name:"Vol 25",decimals:3},
+{symbol:"R_50",name:"Vol 50",decimals:4},
+{symbol:"R_75",name:"Vol 75",decimals:4},
+{symbol:"R_100",name:"Vol 100",decimals:2}
 ];
+const hist=new Map(),nodes=new Map(),openM=new Map(),pending=new Map(),lastSig=new Map();
+let dataWs=null,tradeWs=null,rid=1,authorized=false,currency="USD",loginId="";
+let sessionPnl=0,tradeCount=0,winCount=0,halted=false,dataTimer=null,closing=false;
 
-const hist = new Map();
-const nodes = new Map();
-const openM = new Map();
-const pending = new Map();
-const lastSig = new Map();
-
-let dataWs = null;
-let tradeWs = null;
-let rid = 1;
-let authorized = false;
-let currency = "USD";
-let loginId = "";
-let sessionPnl = 0;
-let tradeCount = 0;
-let closing = false;
-let dataTimer = null;
-
-function $(id) { return document.getElementById(id); }
-function log(m) {
-  const e = document.createElement("div");
-  e.className = "log-entry";
-  e.textContent = new Date().toLocaleTimeString() + " — " + m;
-  const b = $("log");
-  b.prepend(e);
-  while (b.children.length > 90) b.removeChild(b.lastChild);
-}
-function stake() {
-  const n = parseFloat($("stake").value);
-  return Number.isFinite(n) && n > 0 ? n : 1;
-}
-function stopL() {
-  const n = parseFloat($("sl").value);
-  return Number.isFinite(n) && n >= 0 ? n : 20;
-}
-function dur() { return parseInt($("dur").value, 10) || 1; }
-function setData(t, ok) {
-  $("dataStatus").textContent = t;
-  $("dataStatus").style.color = ok ? "var(--green)" : "var(--yellow)";
-}
-function setTrade(t, ok) {
-  $("tradeStatus").textContent = t;
-  $("tradeStatus").style.color = ok ? "var(--green)" : "var(--yellow)";
-}
-function updPnl() {
-  const e = $("pnl");
-  e.textContent = (sessionPnl >= 0 ? "+" : "") + sessionPnl.toFixed(2);
-  e.className = sessionPnl >= 0 ? "pnl-pos" : "pnl-neg";
-  $("tc").textContent = String(tradeCount);
+function $(i){return document.getElementById(i)}
+function log(m){const e=document.createElement("div");e.className="log-entry";e.textContent=new Date().toLocaleTimeString()+" — "+m;const b=$("log");b.prepend(e);while(b.children.length>100)b.removeChild(b.lastChild)}
+function stake(){const n=parseFloat($("stake").value);return Number.isFinite(n)&&n>0?n:1}
+function stopL(){const n=parseFloat($("sl").value);return Number.isFinite(n)&&n>=0?n:10}
+function takeP(){const n=parseFloat($("tp").value);return Number.isFinite(n)&&n>=0?n:20}
+function dur(){return parseInt($("dur").value,10)||1}
+function cooldown(){const n=parseFloat($("cd").value);return(Number.isFinite(n)?n:15)*1000}
+function setData(t,ok){$("dataStatus").textContent=t;$("dataStatus").style.color=ok?"var(--green)":"var(--yellow)"}
+function setTrade(t,ok){$("tradeStatus").textContent=t;$("tradeStatus").style.color=ok?"var(--green)":"var(--yellow)"}
+function updPnl(){const e=$("pnl");e.textContent=(sessionPnl>=0?"+":"")+sessionPnl.toFixed(2);e.className=sessionPnl>=0?"pnl-pos":"pnl-neg";$("tc").textContent=tradeCount+" / "+winCount}
+function checkLimits(){
+  if(sessionPnl<=-stopL()){halted=true;$("auto").checked=false;log("STOP LOSS @ "+sessionPnl.toFixed(2));return true}
+  if(sessionPnl>=takeP()){halted=true;$("auto").checked=false;log("TAKE PROFIT @ "+sessionPnl.toFixed(2));return true}
+  return false;
 }
 
-MARKETS.forEach(m => {
-  const c = document.createElement("article");
-  c.className = "market";
-  c.innerHTML =
-    `<h3>${m.name}</h3><div class="badge" data-s>Waiting</div>
-    <div class="row"><span class="label">Ticks</span><span data-c>0/420</span></div>
-    <div class="row"><span class="label">Price</span><span data-p>—</span></div>
-    <p class="muted" style="margin:4px 0 2px">Prev 300</p><div class="digits" data-a></div>
-    <p class="muted" style="margin:4px 0 2px">Latest 120</p><div class="digits" data-b></div>
-    <p class="muted" data-r>Collecting…</p>
-    <button class="success" data-t style="margin-top:6px;display:none">Trade</button>`;
+MARKETS.forEach(m=>{
+  const c=document.createElement("article");c.className="market";
+  c.innerHTML=`<h3>${m.name}</h3><div class="badge" data-s>…</div>
+  <div class="row"><span class="label">Ticks</span><span data-c>0/420</span></div>
+  <div class="row"><span class="label">Price</span><span data-p>—</span></div>
+  <p class="muted" style="margin:2px 0">Prev 300</p><div class="digits" data-a></div>
+  <p class="muted" style="margin:2px 0">Latest 120</p><div class="digits" data-b></div>
+  <p class="muted" data-r></p>`;
   $("markets").appendChild(c);
-  nodes.set(m.symbol, {
-    c,
-    s: c.querySelector("[data-s]"),
-    ct: c.querySelector("[data-c]"),
-    p: c.querySelector("[data-p]"),
-    a: c.querySelector("[data-a]"),
-    b: c.querySelector("[data-b]"),
-    r: c.querySelector("[data-r]"),
-    t: c.querySelector("[data-t]")
-  });
-  hist.set(m.symbol, []);
+  nodes.set(m.symbol,{c,s:c.querySelector("[data-s]"),ct:c.querySelector("[data-c]"),p:c.querySelector("[data-p]"),a:c.querySelector("[data-a]"),b:c.querySelector("[data-b]"),r:c.querySelector("[data-r]")});
+  hist.set(m.symbol,[]);
 });
 
-function ld(price, d) {
-  return Number(Number(price).toFixed(d).replace(".", "").slice(-1));
+function ld(price,d){return Number(Number(price).toFixed(d).replace(".","").slice(-1))}
+function top(arr,d){const c=Array(10).fill(0);for(const p of arr)c[ld(p,d)]++;const m=Math.max(...c);return c.map((n,i)=>n===m?i:-1).filter(i=>i>=0)}
+function put(el,ds){el.replaceChildren();for(const d of ds){const s=document.createElement("span");s.className="digit";s.textContent=d;el.appendChild(s)}}
+
+function analyze(m){
+  const t=hist.get(m.symbol)||[],n=nodes.get(m.symbol);
+  n.ct.textContent=Math.min(t.length,420)+"/420";
+  if(t.length)n.p.textContent=Number(t[t.length-1]).toFixed(m.decimals);
+  if(t.length<420){n.s.textContent="Collecting";n.r.textContent="Need 420";n.c.classList.remove("match");put(n.a,[]);put(n.b,[]);return null}
+  const A=top(t.slice(-420,-120),m.decimals),B=top(t.slice(-120),m.decimals),sh=A.filter(d=>B.includes(d));
+  put(n.a,A);put(n.b,B);
+  if(sh.length){n.c.classList.add("match");n.s.textContent="MATCH";n.r.textContent="Shared "+sh.join(",");return{...m,shared:sh,A,B}}
+  n.c.classList.remove("match");n.s.textContent="No match";n.r.textContent="";return null;
 }
-function top(arr, d) {
-  const c = Array(10).fill(0);
-  for (const p of arr) c[ld(p, d)]++;
-  const m = Math.max(...c);
-  return c.map((n, i) => (n === m ? i : -1)).filter(i => i >= 0);
-}
-function put(el, ds) {
-  el.replaceChildren();
-  for (const d of ds) {
-    const s = document.createElement("span");
-    s.className = "digit";
-    s.textContent = d;
-    el.appendChild(s);
+
+function refresh(){
+  const matches=[];let ready=0;
+  for(const m of MARKETS){if((hist.get(m.symbol)||[]).length>=420)ready++;const r=analyze(m);if(r)matches.push(r)}
+  const box=$("matches");box.replaceChildren();
+  if(!matches.length){const p=document.createElement("p");p.className="muted";p.textContent="No MATCH yet ("+ready+"/10 ready)";box.appendChild(p);return}
+  for(const m of matches){
+    const d=document.createElement("div");d.className="market match";
+    d.innerHTML=`<h3>${m.name}</h3><p>Digit <strong>${m.shared[0]}</strong> (${m.shared.join(", ")})</p>
+    <p class="muted">Prev ${m.A.join(",")} · Latest ${m.B.join(",")}</p>`;
+    box.appendChild(d);
+    if(authorized&&$("auto").checked&&!halted)tryAuto(m);
   }
 }
 
-function analyze(m) {
-  const t = hist.get(m.symbol) || [];
-  const n = nodes.get(m.symbol);
-  n.ct.textContent = Math.min(t.length, 420) + "/420";
-  if (t.length) n.p.textContent = Number(t[t.length - 1]).toFixed(m.decimals);
-  if (t.length < 420) {
-    n.s.textContent = "Collecting";
-    n.r.textContent = "Need 420 (have " + t.length + ")";
-    n.c.classList.remove("match");
-    n.t.style.display = "none";
-    put(n.a, []);
-    put(n.b, []);
-    return null;
-  }
-  const A = top(t.slice(-420, -120), m.decimals);
-  const B = top(t.slice(-120), m.decimals);
-  const sh = A.filter(d => B.includes(d));
-  put(n.a, A);
-  put(n.b, B);
-  if (sh.length) {
-    n.c.classList.add("match");
-    n.s.textContent = "MATCH";
-    n.r.textContent = "Shared: " + sh.join(", ");
-    if (authorized) {
-      n.t.style.display = "inline-block";
-      n.t.textContent = "Trade " + sh[0];
-      n.t.onclick = () => placeTrade(m.symbol, sh[0]);
-    } else n.t.style.display = "none";
-    return { ...m, shared: sh, A, B };
-  }
-  n.c.classList.remove("match");
-  n.s.textContent = "No match";
-  n.r.textContent = "No shared top digit";
-  n.t.style.display = "none";
-  return null;
+function tryAuto(m){
+  if(checkLimits())return;
+  if(openM.has(m.symbol))return;
+  const digit=m.shared[0],key=m.symbol+":"+digit;
+  if(Date.now()-(lastSig.get(key)||0)<cooldown())return;
+  lastSig.set(key,Date.now());
+  placeTrade(m.symbol,digit);
 }
 
-function refresh() {
-  const matches = [];
-  let ready = 0;
-  for (const m of MARKETS) {
-    if ((hist.get(m.symbol) || []).length >= 420) ready++;
-    const r = analyze(m);
-    if (r) matches.push(r);
-  }
-  $("ready").textContent = ready + " / " + MARKETS.length;
-  const box = $("matches");
-  box.replaceChildren();
-  if (!matches.length) {
-    const p = document.createElement("p");
-    p.className = "muted";
-    p.textContent = "No matches yet.";
-    box.appendChild(p);
-  } else {
-    for (const m of matches) {
-      const d = document.createElement("div");
-      d.className = "market match";
-      d.innerHTML =
-        `<h3>${m.name} — MATCH</h3>
-        <p>Shared: <strong>${m.shared.join(", ")}</strong></p>
-        <p class="muted">Prev: ${m.A.join(", ")} | Latest: ${m.B.join(", ")}</p>`;
-      if (authorized) {
-        const b = document.createElement("button");
-        b.className = "success";
-        b.textContent = "Trade " + m.shared[0];
-        b.onclick = () => placeTrade(m.symbol, m.shared[0]);
-        d.appendChild(b);
-      }
-      box.appendChild(d);
-      if (authorized && $("auto").checked) tryAuto(m);
-    }
-  }
-}
-
-function tryAuto(m) {
-  if (sessionPnl <= -stopL()) {
-    $("auto").checked = false;
-    log("Stop-loss hit");
-    return;
-  }
-  if (openM.has(m.symbol)) return;
-  const digit = m.shared[0];
-  const key = m.symbol + ":" + digit;
-  if (Date.now() - (lastSig.get(key) || 0) < 20000) return;
-  lastSig.set(key, Date.now());
-  placeTrade(m.symbol, digit);
-}
-
-/* —— Public ticks —— */
-function connectData() {
+function connectData(){
   clearTimeout(dataTimer);
-  if (dataWs) {
-    try { dataWs.onclose = null; dataWs.close(); } catch (_) {}
-  }
-  for (const m of MARKETS) hist.set(m.symbol, []);
-  setData("Connecting…", false);
-  log("Public WS connecting…");
-  try {
-    dataWs = new WebSocket(DATA_URL);
-  } catch (e) {
-    log("Data WS error: " + e.message);
-    dataTimer = setTimeout(connectData, 4000);
-    return;
-  }
-  dataWs.onopen = () => {
-    setData("Live", true);
-    log("Public ticks OPEN");
-    for (const m of MARKETS) {
-      dataWs.send(JSON.stringify({
-        ticks_history: m.symbol,
-        adjust_start_time: 1,
-        count: 500,
-        end: "latest",
-        style: "ticks",
-        req_id: rid++
-      }));
+  if(dataWs){try{dataWs.onclose=null;dataWs.close()}catch(_){}}
+  for(const m of MARKETS)hist.set(m.symbol,[]);
+  setData("Connecting…",false);
+  try{dataWs=new WebSocket(DATA_URL)}catch(e){log("Data fail: "+e.message);dataTimer=setTimeout(connectData,5e3);return}
+  dataWs.onopen=()=>{
+    setData("Live",true);log("Public ticks OPEN");
+    for(const m of MARKETS)dataWs.send(JSON.stringify({ticks_history:m.symbol,adjust_start_time:1,count:500,end:"latest",style:"ticks",req_id:rid++}));
+  };
+  dataWs.onmessage=ev=>{
+    let msg;try{msg=JSON.parse(ev.data)}catch(_){return}
+    if(msg.error){log("Data err: "+(msg.error.message||""));return}
+    if(msg.msg_type==="history"){
+      const sym=msg.echo_req&&msg.echo_req.ticks_history;if(!sym||!hist.has(sym))return;
+      hist.set(sym,((msg.history&&msg.history.prices)||[]).map(Number).filter(Number.isFinite).slice(-420));
+      dataWs.send(JSON.stringify({ticks:sym,subscribe:1,req_id:rid++}));
+      refresh();return;
+    }
+    if(msg.msg_type==="tick"&&msg.tick){
+      const sym=msg.tick.symbol;if(!hist.has(sym))return;
+      const q=Number(msg.tick.quote);if(!Number.isFinite(q))return;
+      const a=hist.get(sym);a.push(q);while(a.length>420)a.shift();refresh();
     }
   };
-  dataWs.onmessage = ev => {
-    let msg;
-    try { msg = JSON.parse(ev.data); } catch (_) { return; }
-    if (msg.error) {
-      log("Data error: " + (msg.error.message || ""));
-      return;
-    }
-    if (msg.msg_type === "history") {
-      const sym = msg.echo_req && msg.echo_req.ticks_history;
-      if (!sym || !hist.has(sym)) return;
-      const prices = (msg.history && msg.history.prices) || [];
-      hist.set(sym, prices.map(Number).filter(Number.isFinite).slice(-420));
-      log(sym + ": " + hist.get(sym).length + " ticks");
-      dataWs.send(JSON.stringify({ ticks: sym, subscribe: 1, req_id: rid++ }));
-      refresh();
-      return;
-    }
-    if (msg.msg_type === "tick" && msg.tick) {
-      const sym = msg.tick.symbol;
-      if (!hist.has(sym)) return;
-      const q = Number(msg.tick.quote);
-      if (!Number.isFinite(q)) return;
-      const a = hist.get(sym);
-      a.push(q);
-      while (a.length > 420) a.shift();
-      refresh();
-    }
-  };
-  dataWs.onerror = () => log("Public WS error");
-  dataWs.onclose = ev => {
-    setData("Closed " + ev.code, false);
-    log("Public WS closed " + ev.code);
-    if (!closing) dataTimer = setTimeout(connectData, 4000);
-  };
+  dataWs.onerror=()=>log("Public WS error");
+  dataWs.onclose=ev=>{setData("Closed "+ev.code,false);log("Public closed "+ev.code);if(!closing)dataTimer=setTimeout(connectData,4e3)};
 }
 
-/* —— Trading via PAT → accounts → OTP → demo WS —— */
-function sendTrade(obj) {
-  if (!tradeWs || tradeWs.readyState !== 1) return null;
-  const id = rid++;
-  tradeWs.send(JSON.stringify({ ...obj, req_id: id }));
-  return id;
-}
+function sendTrade(o){if(!tradeWs||tradeWs.readyState!==1)return null;const id=rid++;tradeWs.send(JSON.stringify({...o,req_id:id}));return id}
 
-function onTradeMsg(ev) {
-  let msg;
-  try { msg = JSON.parse(ev.data); } catch (_) { return; }
-  if (msg.error) {
-    log("Trade error: " + (msg.error.message || JSON.stringify(msg.error)));
-    const p = pending.get(msg.req_id);
-    if (p) {
-      pending.delete(msg.req_id);
-      openM.delete(p.symbol);
-    }
+function onTradeMsg(ev){
+  let msg;try{msg=JSON.parse(ev.data)}catch(_){return}
+  if(msg.error){
+    log("API error: "+(msg.error.message||JSON.stringify(msg.error)));
+    const p=pending.get(msg.req_id);if(p){pending.delete(msg.req_id);openM.delete(p.symbol)}
     return;
   }
-  if (msg.msg_type === "balance" && msg.balance) {
-    $("account").textContent =
-      loginId + " · " + Number(msg.balance.balance).toFixed(2) + " " +
-      (msg.balance.currency || currency);
-    return;
+  if(msg.msg_type==="balance"&&msg.balance){
+    $("account").textContent=loginId+" · "+Number(msg.balance.balance).toFixed(2)+" "+(msg.balance.currency||currency);return;
   }
-  if (msg.msg_type === "proposal") {
-    const info = pending.get(msg.req_id);
-    if (!info) return;
-    pending.delete(msg.req_id);
-    const pid = msg.proposal && msg.proposal.id;
-    if (!pid) {
-      log("No proposal id");
-      openM.delete(info.symbol);
-      return;
-    }
-    log("Buying " + info.symbol + " digit " + info.digit + "…");
-    const bid = sendTrade({ buy: pid, price: stake() });
-    if (bid != null) pending.set(bid, info);
-    else openM.delete(info.symbol);
-    return;
+  if(msg.msg_type==="proposal"){
+    const info=pending.get(msg.req_id);if(!info)return;pending.delete(msg.req_id);
+    const pid=msg.proposal&&msg.proposal.id;
+    if(!pid){log("No proposal id");openM.delete(info.symbol);return}
+    log("Buying "+info.symbol+" digit "+info.digit);
+    const bid=sendTrade({buy:pid,price:stake()});
+    if(bid!=null)pending.set(bid,info);else openM.delete(info.symbol);return;
   }
-  if (msg.msg_type === "buy") {
-    const info = pending.get(msg.req_id);
-    pending.delete(msg.req_id);
-    if (!msg.buy) {
-      if (info) openM.delete(info.symbol);
-      return;
-    }
-    tradeCount++;
+  if(msg.msg_type==="buy"){
+    const info=pending.get(msg.req_id);pending.delete(msg.req_id);
+    if(!msg.buy){if(info)openM.delete(info.symbol);return}
+    tradeCount++;updPnl();
+    const cid=msg.buy.contract_id;
+    if(info)openM.set(info.symbol,cid);
+    log("BOUGHT #"+cid+" @ "+msg.buy.buy_price);
+    sendTrade({proposal_open_contract:1,contract_id:cid,subscribe:1});return;
+  }
+  if(msg.msg_type==="proposal_open_contract"){
+    const c=msg.proposal_open_contract;if(!c||!c.is_sold)return;
+    const profit=Number(c.profit)||0;
+    sessionPnl+=profit;if(profit>0)winCount++;
     updPnl();
-    const cid = msg.buy.contract_id;
-    if (info) openM.set(info.symbol, cid);
-    log("Bought #" + cid + " @ " + msg.buy.buy_price);
-    sendTrade({ proposal_open_contract: 1, contract_id: cid, subscribe: 1 });
-    return;
-  }
-  if (msg.msg_type === "proposal_open_contract") {
-    const c = msg.proposal_open_contract;
-    if (!c || !c.is_sold) return;
-    const profit = Number(c.profit) || 0;
-    sessionPnl += profit;
-    updPnl();
-    for (const [s, id] of openM) if (id === c.contract_id) openM.delete(s);
-    log("Closed #" + c.contract_id + " P/L " + profit.toFixed(2) +
-      " (" + (c.status || "") + ") | Session " + sessionPnl.toFixed(2));
-    if (sessionPnl <= -stopL()) {
-      $("auto").checked = false;
-      log("Stop-loss reached");
-    }
+    for(const[s,id]of openM)if(id===c.contract_id)openM.delete(s);
+    log("CLOSED #"+c.contract_id+" "+(c.status||"")+" P/L "+profit.toFixed(2)+" | session "+sessionPnl.toFixed(2));
+    checkLimits();
   }
 }
 
-function openTradeWs(url) {
-  if (tradeWs) {
-    try { tradeWs.onclose = null; tradeWs.close(); } catch (_) {}
-  }
-  log("Trade WS connecting…");
-  tradeWs = new WebSocket(url);
-  tradeWs.onopen = () => {
-    authorized = true;
-    setTrade("Connected ✓", true);
-    $("btnConnect").disabled = true;
-    $("btnDisconnect").disabled = false;
-    log("Trade WS OPEN — demo ready");
-    sendTrade({ balance: 1, subscribe: 1 });
-    refresh();
+function openTradeWs(url){
+  if(tradeWs){try{tradeWs.onclose=null;tradeWs.close()}catch(_){}}
+  log("Opening trade WS…");
+  tradeWs=new WebSocket(url);
+  tradeWs.onopen=()=>{
+    authorized=true;halted=false;
+    setTrade("Connected ✓",true);
+    $("btnConnect").disabled=true;$("btnDisconnect").disabled=false;$("btnTest").disabled=false;
+    log("TRADE WS OPEN — auto armed");
+    sendTrade({balance:1,subscribe:1});refresh();
   };
-  tradeWs.onmessage = onTradeMsg;
-  tradeWs.onerror = () => log("Trade WS error");
-  tradeWs.onclose = () => {
-    authorized = false;
-    setTrade("Disconnected", false);
-    $("btnConnect").disabled = false;
-    $("btnDisconnect").disabled = true;
-    log("Trade WS closed");
-    refresh();
+  tradeWs.onmessage=onTradeMsg;
+  tradeWs.onerror=()=>log("Trade WS error");
+  tradeWs.onclose=()=>{
+    authorized=false;setTrade("Disconnected",false);
+    $("btnConnect").disabled=false;$("btnDisconnect").disabled=true;$("btnTest").disabled=true;
+    log("Trade WS closed");refresh();
   };
 }
 
-async function connectDemo() {
-  const token = ($("token").value || "").trim();
-  const appId = ($("appId").value || "").trim() || DEFAULT_APP;
-  if (!token) {
-    log("Paste PAT first");
-    return;
-  }
-  const headers = {
-    Authorization: "Bearer " + token,
-    "Deriv-App-ID": appId,
-    Accept: "application/json",
-    "Content-Type": "application/json"
-  };
+async function connectDemo(){
+  const token=($("token").value||"").trim();
+  const appId=($("appId").value||"").trim()||"34HGxgLgJ2cgLoSHopY2r";
+  if(!token){log("Paste PAT first");return}
+  const headers={Authorization:"Bearer "+token,"Deriv-App-ID":appId,Accept:"application/json","Content-Type":"application/json"};
 
-  setTrade("Listing accounts…", false);
-  log("GET /accounts");
-  let res, text;
-  try {
-    res = await fetch(REST + "/accounts", { method: "GET", headers });
-    text = await res.text();
-  } catch (e) {
-    log("Accounts network error: " + e.message);
-    setTrade("Network error", false);
-    return;
-  }
-  if (!res.ok) {
-    log("Accounts HTTP " + res.status + ": " + text.slice(0, 200));
-    setTrade("Auth failed " + res.status, false);
-    return;
-  }
-  let json;
-  try { json = JSON.parse(text); } catch (_) {
-    log("Bad accounts JSON");
-    setTrade("Bad JSON", false);
-    return;
-  }
-  const accounts = Array.isArray(json.data) ? json.data : [];
-  log("Accounts: " + accounts.map(a => a.account_id + "/" + a.account_type).join(", "));
-  const demo = accounts.find(a => a.account_type === "demo") || accounts[0];
-  if (!demo) {
-    log("No accounts found");
-    setTrade("No account", false);
-    return;
-  }
-  loginId = demo.account_id;
-  currency = demo.currency || "USD";
-  $("account").textContent = loginId + " (" + currency + ")";
-  log("Selected demo " + loginId);
+  setTrade("GET accounts…",false);log("GET /accounts");
+  let res,text;
+  try{res=await fetch(REST+"/accounts",{method:"GET",headers});text=await res.text()}
+  catch(e){log("FETCH FAILED: "+e.message);setTrade("Fetch failed",false);return}
+  log("Accounts HTTP "+res.status);
+  if(!res.ok){log(text.slice(0,250));setTrade("Auth "+res.status,false);return}
+  let json;try{json=JSON.parse(text)}catch(_){setTrade("Bad JSON",false);return}
+  const accounts=Array.isArray(json.data)?json.data:[];
+  log("Found: "+accounts.map(a=>a.account_id+"("+a.account_type+")").join(", "));
+  const demo=accounts.find(a=>a.account_type==="demo")||accounts[0];
+  if(!demo){log("No demo");setTrade("No demo",false);return}
+  loginId=demo.account_id;currency=demo.currency||"USD";
+  $("account").textContent=loginId+" · "+demo.balance+" "+currency;
+  log("Demo="+loginId);
 
-  setTrade("Requesting OTP…", false);
-  log("POST /accounts/" + loginId + "/otp");
-  let otpRes, otpText;
-  try {
-    otpRes = await fetch(REST + "/accounts/" + encodeURIComponent(loginId) + "/otp", {
-      method: "POST",
-      headers
-    });
-    otpText = await otpRes.text();
-  } catch (e) {
-    log("OTP network error: " + e.message);
-    setTrade("OTP failed", false);
-    return;
-  }
-  if (!otpRes.ok) {
-    log("OTP HTTP " + otpRes.status + ": " + otpText.slice(0, 200));
-    setTrade("OTP " + otpRes.status, false);
-    return;
-  }
-  let otpJson;
-  try { otpJson = JSON.parse(otpText); } catch (_) {
-    setTrade("OTP bad JSON", false);
-    return;
-  }
-  // Official shape: { data: { url: "wss://.../ws/demo?otp=..." } }
-  const wsUrl = (otpJson.data && otpJson.data.url) || otpJson.url ||
-    (otpJson.data && otpJson.data.websocket_url);
-  if (!wsUrl) {
-    log("No url in OTP: " + otpText.slice(0, 200));
-    setTrade("No WS URL", false);
-    return;
-  }
-  log("OTP url received");
-  openTradeWs(wsUrl);
+  setTrade("POST otp…",false);log("POST /accounts/"+loginId+"/otp");
+  let otpRes,otpText;
+  try{otpRes=await fetch(REST+"/accounts/"+encodeURIComponent(loginId)+"/otp",{method:"POST",headers});otpText=await otpRes.text()}
+  catch(e){log("OTP fail: "+e.message);setTrade("OTP fail",false);return}
+  log("OTP HTTP "+otpRes.status);
+  if(!otpRes.ok){log(otpText.slice(0,250));setTrade("OTP "+otpRes.status,false);return}
+  let otpJson;try{otpJson=JSON.parse(otpText)}catch(_){setTrade("OTP JSON fail",false);return}
+  const wsUrl=(otpJson.data&&otpJson.data.url)||otpJson.url;
+  if(!wsUrl){log("No data.url: "+otpText.slice(0,200));setTrade("No url",false);return}
+  log("OTP url OK");openTradeWs(wsUrl);
 }
 
-function placeTrade(symbol, digit) {
-  if (!authorized) {
-    log("Connect demo first");
-    return;
-  }
-  if (sessionPnl <= -stopL()) {
-    log("Stop-loss hit");
-    return;
-  }
-  if (openM.has(symbol)) {
-    log(symbol + " already open");
-    return;
-  }
-  openM.set(symbol, "pending");
-  const id = sendTrade({
-    proposal: 1,
-    amount: stake(),
-    basis: "stake",
-    contract_type: "DIGITMATCH",
-    currency: currency,
-    duration: dur(),
-    duration_unit: "t",
-    barrier: String(digit),
-    underlying_symbol: symbol
+function placeTrade(symbol,digit){
+  if(!authorized){log("Not connected");return}
+  if(halted||checkLimits())return;
+  if(openM.has(symbol))return;
+  openM.set(symbol,"pending");
+  const id=sendTrade({
+    proposal:1,amount:stake(),basis:"stake",contract_type:"DIGITMATCH",
+    currency:currency,duration:dur(),duration_unit:"t",barrier:String(digit),
+    underlying_symbol:symbol
   });
-  if (id != null) {
-    pending.set(id, { symbol, digit });
-    log("SIGNAL → " + symbol + " match " + digit + " stake " + stake() + " × " + dur() + "t");
-  } else {
-    openM.delete(symbol);
-  }
+  if(id!=null){pending.set(id,{symbol,digit});log("AUTO → "+symbol+" DIGITMATCH "+digit+" stake="+stake()+" t="+dur())}
+  else openM.delete(symbol);
 }
 
-function disconnect() {
-  closing = false;
-  if (tradeWs) {
-    try { tradeWs.close(); } catch (_) {}
-    tradeWs = null;
-  }
-  authorized = false;
-  openM.clear();
-  pending.clear();
-  setTrade("Not connected", false);
-  $("account").textContent = "—";
-  $("btnConnect").disabled = false;
-  $("btnDisconnect").disabled = true;
-  log("Disconnected");
-  refresh();
+function testTrade(){if(!authorized){log("Connect first");return}placeTrade("R_100",5)}
+function disconnect(){
+  if(tradeWs){try{tradeWs.close()}catch(_){}}
+  tradeWs=null;authorized=false;openM.clear();pending.clear();
+  setTrade("Not connected",false);$("account").textContent="—";
+  $("btnConnect").disabled=false;$("btnDisconnect").disabled=true;$("btnTest").disabled=true;
+  log("Disconnected");refresh();
 }
 
-$("btnConnect").onclick = () => {
-  $("btnConnect").disabled = true;
-  connectDemo().finally(() => {
-    if (!authorized) $("btnConnect").disabled = false;
-  });
-};
-$("btnDisconnect").onclick = disconnect;
-$("token").onkeydown = e => {
-  if (e.key === "Enter") $("btnConnect").click();
-};
-
-window.addEventListener("beforeunload", () => {
-  closing = true;
-  clearTimeout(dataTimer);
-  if (dataWs) dataWs.close();
-  if (tradeWs) tradeWs.close();
-});
-
-updPnl();
-connectData();
-log("Paste PAT → Connect demo. Do not commit your token to GitHub.");
+$("btnConnect").onclick=()=>{$("btnConnect").disabled=true;connectDemo().finally(()=>{if(!authorized)$("btnConnect").disabled=false})}
+$("btnDisconnect").onclick=disconnect;
+$("btnTest").onclick=testTrade;
+$("token").onkeydown=e=>{if(e.key==="Enter")$("btnConnect").click()};
+$("auto").onchange=()=>{if($("auto").checked){halted=false;log("Auto ON")}};
+window.addEventListener("beforeunload",()=>{closing=true;clearTimeout(dataTimer);if(dataWs)dataWs.close();if(tradeWs)tradeWs.close()});
+updPnl();connectData();log("Ready — Connect demo, then Test trade $1 or wait for MATCH.");
 </script>
 </body>
 </html>
